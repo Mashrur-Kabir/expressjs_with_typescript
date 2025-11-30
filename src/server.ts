@@ -1,4 +1,4 @@
-import express, { Request, Response } from "express";
+import express, { NextFunction, Request, Response } from "express";
 import { Pool } from "pg";
 import dotenv from "dotenv";
 import path from "path";
@@ -53,13 +53,19 @@ const initDB = async () => {
 
 initDB();
 
-app.get("/", (req: Request, res: Response) => {
+//logger middleware
+const logger = (req: Request, res: Request, next: NextFunction) => {
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.path}\n`);
+  next();
+};
+
+app.get("/", logger, (req: Request, res: Response) => {
   res.send(
     "Hello World! Im using express with typescript. Its listening and changing thanks to tsx"
   );
 });
 
-//(users CRUD):
+//(users CRUD):------------------------------------------------
 
 //post user
 app.post("/users", async (req: Request, res: Response) => {
@@ -211,6 +217,57 @@ app.delete("/users/:id", async (req: Request, res: Response) => {
       message: err.message,
     });
   }
+});
+
+//(todos CRUD):------------------------------------------------
+
+//post todos
+app.post("/todos", async (req: Request, res: Response) => {
+  const { user_id, title } = req.body;
+
+  try {
+    const result = await pool.query(
+      `INSERT INTO todos(user_id, title) VALUES($1, $2) RETURNING *`,
+      [user_id, title]
+    );
+    // console.log(result.rows[0]);
+    res.status(201).json({
+      success: true,
+      message: "Data inserted successfully!",
+      data: result.rows[0],
+    });
+  } catch (err: any) {
+    res.status(500).json({
+      success: false,
+      message: err.message,
+    });
+  }
+});
+
+//get all todos
+app.get("/todos", async (req: Request, res: Response) => {
+  try {
+    const result = await pool.query(`SELECT * FROM todos ORDER BY id ASC`);
+    res.status(201).json({
+      success: true,
+      message: "All data retrieved successfully!",
+      data: result.rows,
+    });
+  } catch (err: any) {
+    res.status(500).json({
+      success: false,
+      message: err.message,
+    });
+  }
+});
+
+//handle 404 not found
+app.use((req, res) => {
+  res.status(404).json({
+    success: false,
+    message: "route not found",
+    path: req.path,
+  });
 });
 
 app.listen(port, () => {

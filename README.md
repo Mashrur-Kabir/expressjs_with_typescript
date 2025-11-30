@@ -65,10 +65,10 @@ npm i --save-dev @types/express
 
 2. **Running TypeScript via Node without compiling to JS**:
 
-- Install `tsx`:
+- Install `tsx` globally:
 
 ```bash
-npx install --save-dev tsx
+npm install --save-dev tsx
 ```
 
 - Add a script in `package.json`:
