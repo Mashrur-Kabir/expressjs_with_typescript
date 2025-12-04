@@ -294,46 +294,40 @@ app.listen(PORT, () => console.log("Server running..."));
 
 # Final Project structure and Result:
 
-EXPRESSJS/
+```bash
+ExpressJS/
 ├── node_modules/
 ├── src/
-│ ├── config/
-│ │ ├── db.ts
-│ │ └── index.ts
-│ │
-│ ├── middleware/
-│ │ ├── auth.ts
-│ │ └── logger.ts
-│ │
-│ ├── modules/
-│ │ ├── auth/
-│ │ │ ├── auth.controller.ts
-│ │ │ ├── auth.routes.ts
-│ │ │ └── auth.service.ts
-│ │ │
-│ │ ├── todo/
-│ │ │ ├── todo.controller.ts
-│ │ │ ├── todo.routes.ts
-│ │ │ └── todo.service.ts
-│ │ │
-│ │ └── user/
-│ │ ├── user.controller.ts
-│ │ ├── user.routes.ts
-│ │ └── user.service.ts
-│ │
-│ ├── types/
-│ │ └── express/
-│ │ └── index.d.ts
-│ │
-│ ├── app.ts
-│ └── server.ts
-│
+│   ├── config/
+│   │   ├── db.ts
+│   │   └── index.ts
+│   ├── middleware/
+│   │   ├── auth.ts
+│   │   └── logger.ts
+│   ├── modules/
+│   │   ├── auth/
+│   │   │   ├── auth.controller.ts
+│   │   │   ├── auth.routes.ts
+│   │   │   └── auth.service.ts
+│   │   ├── todo/
+│   │   │   ├── todo.controller.ts
+│   │   │   ├── todo.routes.ts
+│   │   │   └── todo.service.ts
+│   │   └── user/
+│   │       ├── user.controller.ts
+│   │       ├── user.routes.ts
+│   │       └── user.service.ts
+│   ├── types/express/
+│   │   └── index.d.ts
+│   ├── app.ts
+│   └── server.ts
 ├── .env
 ├── .gitignore
 ├── package.json
 ├── package-lock.json
 ├── README.md
 └── tsconfig.json
+```
 
 ✔ Modular
 ✔ Secure
