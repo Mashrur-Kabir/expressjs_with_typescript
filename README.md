@@ -322,7 +322,8 @@ EXPRESSJS/
 │ │ └── user.service.ts
 │ │
 │ ├── types/
-│ │ └── express/index.d.ts
+│ │ └── express/
+│ │ └── index.d.ts
 │ │
 │ ├── app.ts
 │ └── server.ts
