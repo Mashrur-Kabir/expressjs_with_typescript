@@ -63,7 +63,7 @@ npx tsc --init
 
 ## Getting Started
 
-1. Create `server.ts` and import Express:
+1. Create `server.ts` and inside `./src` import Express:
 
 ```bash
 npm i --save-dev @types/express
