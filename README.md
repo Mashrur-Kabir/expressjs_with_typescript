@@ -107,7 +107,7 @@ npm install pg
 npm i --save-dev @types/pg
 ```
 
-4. Set up a connection pool:
+4. Set up a connection pool (in server.ts if you want for now, but inside ./src/config/db.ts, described in config setup below):
 
 ```ts
 import { Pool } from "pg";
@@ -120,7 +120,7 @@ const pool = new Pool({
 > **Why use a pool?**
 > Instead of connecting → querying → disconnecting every time, a pool keeps a few open connections ready to use, saving time and resources.
 
-5. Initialize database tables:
+5. Initialize database tables (server.ts (optional) but later in db.ts):
 
 - `users`
 - `todos`
@@ -135,7 +135,7 @@ const pool = new Pool({
 npm i dotenv
 ```
 
-2. Configure dotenv in your project:
+2. Configure dotenv in your project (server.ts (optional) but later in ./src/config/index.ts):
 
 ```ts
 import dotenv from "dotenv";
@@ -149,7 +149,7 @@ CONNECTION_STR="your_database_connection_string"
 PORT=5000
 ```
 
-4. Add `.env` to `.gitignore` to keep credentials safe.
+4. Add `.env*` and `node_modules` to `.gitignore` to keep credentials safe and avoid pushing unnecessarily large files.
 
 ---
 
@@ -161,6 +161,7 @@ PORT=5000
 | ---------- | ------------------------------------------ |
 | `index.ts` | loads `dotenv`, exports environment values |
 | `db.ts`    | create `Pool`, define tables, export DB    |
+|            | export default initDB (to export DB)       |
 
 Reason → keeps server clean, reusable everywhere.
 
@@ -168,10 +169,10 @@ Reason → keeps server clean, reusable everywhere.
 
 ### 2 Middleware (`/src/middleware`)
 
-| Middleware  | Use                                            |
-| ----------- | ---------------------------------------------- |
-| `logger.ts` | logs requests for debugging                    |
-| `auth.ts`   | verifies JWT before accessing protected routes |
+| Middleware  | Use                                         |
+| ----------- | ------------------------------------------- |
+| `logger.ts` | logs requests for debugging                 |
+| `auth.ts`   | verifies jwt for accessing protected routes |
 
 ---
 
@@ -192,7 +193,7 @@ route → controller → service → db
 Example user flow:
 
 ```
-/users → user.routes.ts → user.controller.ts → user.service.ts → DB
+./src/modules/users → user.routes.ts → user.controller.ts → user.service.ts → DB
 ```
 
 ---
@@ -207,37 +208,67 @@ Why authentication?
 
 ### Password Hashing
 
+1. Install bcrypt and hash password:
+
+```bash
+npm install bcryptjs
+npm install --save-dev @types/bcryptjs
+```
+
 ```ts
 const hashedPassword = await bcrypt.hash(password, 10);
 ```
 
-Why hash?
-If database leaks → attackers **never** see real passwords.
-
-### Login check
+2. Login check inside ./auth/auth.service.ts
 
 ```ts
 bcrypt.compare(plainPassword, hashedPasswordFromDB);
 ```
 
+Why hash?
+
+> If database leaks → attackers **never** see real passwords.
+
 ---
 
 ## JWT Tokens
 
-Generate secret:
+1. Generate secret:
 
 ```sh
 node
+> const crypto = require('crypto')
 > crypto.randomBytes(64).toString("hex")
 ```
 
-Save in `.env`:
+2. Save in `.env`:
 
 ```
 JWT_SECRET=yourGeneratedKey
 ```
 
-Generate token in `auth.service.ts`:
+3. Set inside config obj in ./config/index.ts:
+
+```ts
+const config = {
+  connection_str: process.env.CONNECTION_STR,
+  port: process.env.PORT,
+  jwt_secret: process.env.JWT_SECRET,
+};
+```
+
+4. Install jwt for dev or prod:
+
+```bash
+npm install jsonwebtoken --save-dev
+npm install @types/jsonwebtoken --save-dev
+```
+
+```bash
+npm install jsonwebtoken
+```
+
+5. Generate token in `auth.service.ts`:
 
 ```ts
 const token = jwt.sign(
@@ -247,11 +278,34 @@ const token = jwt.sign(
 );
 ```
 
-Client must send token with request:
+6. Client must send token with request:
 
 ```
 Authorization: Bearer eyJhbGciOiJI...
 ```
+
+7. An auth middleware (auth.ts) with a higher order function will:
+
+   > receive this token
+
+   ```ts
+   const token = req.headers.authorization?.split(" ")[1];
+   ```
+
+   > jwt will verify user's identity and decide if he's authorized for the request (this should take place in a try-catch block)
+
+   ```ts
+   const decoded = jwt.verify(token, config.jwt_secret as string) as JwtPayload;
+   req.user = decoded; //type declared in ./src/types/express/index.d.ts
+
+   if (roles.length && !roles.includes(decoded.role)) {
+     return res.status(500).json({
+       error: "unauthorized personnel!",
+     });
+   }
+
+   next();
+   ```
 
 ---
 

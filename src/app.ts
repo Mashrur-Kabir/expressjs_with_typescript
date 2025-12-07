@@ -1,5 +1,5 @@
 import express, { Request, Response } from "express";
-import initDB, { pool } from "./config/db";
+import initDB from "./config/db";
 import logger from "./middleware/logger";
 import { userRoutes } from "./modules/user/user.routes";
 import { todoRoutes } from "./modules/todo/todo.routes";
